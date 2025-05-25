@@ -1,91 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consulta de Produtos</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      text-align: center;
-      padding: 30px;
-    }
-    h1 {
-      color: #333;
-    }
-    input[type="text"] {
-      width: 80%;
-      max-width: 600px;
-      padding: 15px;
-      font-size: 18px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 30px;
-    }
-    .resultado {
-      background: #fff;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 800px;
-      text-align: left;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .estoque {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #666;
-    }
-    .sem-resultado {
-      color: #999;
-      font-style: italic;
-    }
-  </style>
-</head>
-<body>
-  <h1>🔍 Consulta de Produtos</h1>
-  <input type="text" id="busca" placeholder="Digite SKU, nome, marca ou código de barras...">
-  <div id="resultados"></div>
+<script>
+  const input = document.getElementById('busca');
+  const resultados = document.getElementById('resultados');
 
-  <script>
-    const input = document.getElementById('busca');
-    const resultados = document.getElementById('resultados');
+  input.addEventListener('input', async () => {
+    const query = input.value.trim();
+    if (query.length < 3) {
+      resultados.innerHTML = '';
+      return;
+    }
 
-    input.addEventListener('input', async () => {
-      const query = input.value.trim();
-      if (query.length < 3) {
-        resultados.innerHTML = '';
+    resultados.innerHTML = '⏳ Buscando...';
+
+    try {
+      const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=${encodeURIComponent(query)}`);
+      const data = await res.json();
+
+      if (data.length === 0) {
+        resultados.innerHTML = '<p class="sem-resultado">Nenhum produto encontrado.</p>';
         return;
       }
 
-      resultados.innerHTML = '⏳ Buscando...';
-
-      try {
-        const res = await fetch(`fetch("https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=" + encodeURIComponent(termoBusca))
-}`);
-        const data = await res.json();
-
-        if (data.length === 0) {
-          resultados.innerHTML = '<p class="sem-resultado">Nenhum produto encontrado.</p>';
-          return;
-        }
-
-        resultados.innerHTML = data.map(prod => `
-          <div class="resultado">
-            <strong>${prod.nome}</strong><br>
-            <small>SKU: ${prod.sku} | Marca: ${prod.marca} | Cód. Barras: ${prod.codigobarra}</small><br>
-            <strong>Preço Loja: R$ ${Number(prod.preco_nct).toFixed(2)}</strong>
-            <div class="estoque">
-              AQA: ${prod.estoque.nctaqa} | OUT: ${prod.estoque.nctout} | CD ACO: ${prod.estoque.cdaco} | WeWork: ${prod.estoque.wework} | Showroom: ${prod.estoque.showroom}
-            </div>
+      resultados.innerHTML = data.map(prod => `
+        <div class="resultado">
+          <strong>${prod.nome}</strong><br>
+          <small>SKU: ${prod.sku} | Marca: ${prod.marca} | Cód. Barras: ${prod.codigobarra}</small><br>
+          <strong>Preço Loja: R$ ${Number(prod.preco_nct).toFixed(2)}</strong>
+          <div class="estoque">
+            AQA: ${prod.estoque.nctaqa} | OUT: ${prod.estoque.nctout} | CD ACO: ${prod.estoque.cdaco} | WeWork: ${prod.estoque.wework} | Showroom: ${prod.estoque.showroom}
           </div>
-        `).join('');
+        </div>
+      `).join('');
 
-      } catch (error) {
-        resultados.innerHTML = '<p class="sem-resultado">Erro ao buscar produtos. Tente novamente.</p>';
-      }
-    });
-  </script>
-</body>
-</html>
+    } catch (error) {
+      resultados.innerHTML = '<p class="sem-resultado">Erro ao buscar produtos. Tente novamente.</p>';
+    }
+  });
+</script>
