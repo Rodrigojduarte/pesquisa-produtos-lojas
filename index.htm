@@ -45,7 +45,7 @@
 </head>
 <body>
   <h1>🔍 Consulta de Produtos</h1>
-  <input type="text" id="busca" placeholder="Digite o código de barras...">
+  <input type="text" id="busca" placeholder="Digite SKU, nome, marca ou código de barras...">
   <div id="resultados"></div>
 
   <script>
@@ -53,8 +53,8 @@
     const resultados = document.getElementById('resultados');
 
     input.addEventListener('input', async () => {
-      const termoBusca = input.value.trim();
-      if (termoBusca.length < 3) {
+      const query = input.value.trim();
+      if (query.length < 3) {
         resultados.innerHTML = '';
         return;
       }
@@ -66,7 +66,7 @@
 }`);
         const data = await res.json();
 
-        if (!Array.isArray(data) || data.length === 0) {
+        if (data.length === 0) {
           resultados.innerHTML = '<p class="sem-resultado">Nenhum produto encontrado.</p>';
           return;
         }
