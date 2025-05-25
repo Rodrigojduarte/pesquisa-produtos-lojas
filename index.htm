@@ -62,7 +62,7 @@
       resultados.innerHTML = '⏳ Buscando...';
 
       try {
-        const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-8beb-c90e604c2077?busca=${encodeURIComponent(query)}`);
+        const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=${encodeURIComponent(query)}`);
         const data = await res.json();
 
         if (data.length === 0) {
