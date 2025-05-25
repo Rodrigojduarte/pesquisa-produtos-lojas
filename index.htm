@@ -1,113 +1,89 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consulta de Produtos</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-    }
-
     body {
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    h1 {
-      font-size: 2rem;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
       text-align: center;
-      margin-bottom: 2rem;
+      padding: 30px;
+    }
+    h1 {
       color: #333;
     }
-
-    .search-container {
-      width: 100%;
-      max-width: 700px;
-      margin-bottom: 2rem;
-    }
-
-    #searchInput {
-      width: 100%;
-      padding: 1rem;
-      font-size: 1.25rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-
-    .result {
-      background: #fff;
+    input[type="text"] {
+      width: 80%;
+      max-width: 600px;
+      padding: 15px;
+      font-size: 18px;
       border-radius: 8px;
-      padding: 1rem;
-      margin-top: 1rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      max-width: 700px;
+      border: 1px solid #ccc;
+      margin-bottom: 30px;
     }
-
-    .not-found {
-      color: red;
-      margin-top: 2rem;
-      font-weight: bold;
+    .resultado {
+      background: #fff;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 800px;
+      text-align: left;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .estoque {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+    .sem-resultado {
+      color: #999;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
   <h1>🔍 Consulta de Produtos</h1>
-
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Escaneie ou digite o código de barras..." autofocus />
-  </div>
-
-  <div id="resultContainer"></div>
+  <input type="text" id="busca" placeholder="Digite o código de barras...">
+  <div id="resultados"></div>
 
   <script>
-    const input = document.getElementById("searchInput");
-    const resultContainer = document.getElementById("resultContainer");
+    const input = document.getElementById('busca');
+    const resultados = document.getElementById('resultados');
 
-    let lastQuery = "";
+    input.addEventListener('input', async () => {
+      const termoBusca = input.value.trim();
+      if (termoBusca.length < 3) {
+        resultados.innerHTML = '';
+        return;
+      }
 
-    async function fetchProduct(query) {
-      if (!query || query === lastQuery || query.length < 13) return;
-
-      lastQuery = query;
-      resultContainer.innerHTML = "<p>Consultando...</p>";
+      resultados.innerHTML = '⏳ Buscando...';
 
       try {
-        const response = await fetch(`fetch("https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=" + encodeURIComponent(termoBusca))
-}`);
-        const data = await response.json();
+        const res = await fetch("https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=" + encodeURIComponent(termoBusca));
+        const data = await res.json();
 
-        if (data && data.length > 0) {
-          const p = data[0];
-          resultContainer.innerHTML = `
-            <div class="result">
-              <strong>${p.nome}</strong><br/>
-              SKU: ${p.sku} | Marca: ${p.marca} | Cód. Barras: ${p.codigobarra}<br/>
-              <strong>Preço Loja:</strong> R$ ${p.preco_nct}<br/>
-              <small>AQA: ${p.estoque.nctaqa} | OUT: ${p.estoque.nctout} | CD ACO: ${p.estoque.cdaco} | WeWork: ${p.estoque.wework} | Showroom: ${p.estoque.showroom}</small>
-            </div>
-          `;
-        } else {
-          resultContainer.innerHTML = '<p class="not-found">Produto não encontrado!</p>';
+        if (!Array.isArray(data) || data.length === 0) {
+          resultados.innerHTML = '<p class="sem-resultado">Nenhum produto encontrado.</p>';
+          return;
         }
-      } catch (error) {
-        console.error("Erro na consulta:", error);
-        resultContainer.innerHTML = '<p class="not-found">Erro na consulta!</p>';
-      }
-    }
 
-    input.addEventListener("input", () => {
-      const query = input.value.trim();
-      if (query.length >= 13) fetchProduct(query);
+        resultados.innerHTML = data.map(prod => `
+          <div class="resultado">
+            <strong>${prod.nome}</strong><br>
+            <small>SKU: ${prod.sku} | Marca: ${prod.marca} | Cód. Barras: ${prod.codigobarra}</small><br>
+            <strong>Preço Loja: R$ ${Number(prod.preco_nct).toFixed(2)}</strong>
+            <div class="estoque">
+              AQA: ${prod.estoque.nctaqa} | OUT: ${prod.estoque.nctout} | CD ACO: ${prod.estoque.cdaco} | WeWork: ${prod.estoque.wework} | Showroom: ${prod.estoque.showroom}
+            </div>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        resultados.innerHTML = '<p class="sem-resultado">Erro ao buscar produtos. Tente novamente.</p>';
+      }
     });
   </script>
 </body>
