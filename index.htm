@@ -5,87 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consulta de Produtos</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      text-align: center;
-      padding: 30px;
-    }
-    h1 {
-      color: #333;
-    }
-    input[type="text"] {
-      width: 80%;
-      max-width: 600px;
-      padding: 15px;
-      font-size: 18px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 30px;
-    }
-    .resultado {
-      background: #fff;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 800px;
-      text-align: left;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .estoque {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #666;
-    }
-    .sem-resultado {
-      color: #999;
-      font-style: italic;
-    }
+    *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;}
+    body{margin:0;padding:2rem;background:#f4f4f4;text-align:center;color:#333;}
+    h1{margin-bottom:2rem;font-size:2rem;display:flex;justify-content:center;align-items:center;gap:.5rem;}
+    .search-box{width:85%;max-width:500px;margin:0 auto 2rem;}
+    #busca{width:100%;padding:1rem;font-size:1.25rem;border-radius:8px;border:1px solid #ccc;}
+    #resultado{max-width:600px;margin:0 auto;}
+    .card{background:#fff;padding:1rem;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);text-align:left;display:flex;gap:1rem;align-items:center;}
+    .foto{width:120px;height:120px;background:#ececec;border-radius:8px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#aaa;font-size:.75rem;}
+    .detalhes{flex:1;}
+    @media(max-width:600px){h1{font-size:1.5rem;} #busca{font-size:1rem;}}
+    .msg{font-style:italic;color:#888;margin-top:1rem;}
   </style>
 </head>
 <body>
   <h1>🔍 Consulta de Produtos</h1>
-  <input type="text" id="busca" placeholder="Digite SKU, nome, marca ou código de barras...">
-  <div id="resultados"></div>
+  <div class="search-box">
+    <input type="text" id="busca" placeholder="Escaneie ou digite o código de barras (EAN-13 / EAN-14)" autofocus />
+  </div>
+  <div id="resultado"></div>
 
-  <script>
-    const input = document.getElementById('busca');
-    const resultados = document.getElementById('resultados');
+<script>
+  const input = document.getElementById('busca');
+  const resultado = document.getElementById('resultado');
 
-    input.addEventListener('input', async () => {
-      const query = input.value.trim();
-      if (query.length < 3) {
-        resultados.innerHTML = '';
+  input.addEventListener('input', () => {
+    const valor = input.value.replace(/[^\d]/g, ''); // somente dígitos
+    if (valor.length === 13 || valor.length === 14) {
+      buscarProduto(valor);
+    } else {
+      resultado.innerHTML = '';
+    }
+  });
+
+  async function buscarProduto(gtin){
+    resultado.innerHTML = '<p class="msg">⏳ Buscando...</p>';
+    try{
+      const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=${gtin}`);
+      const dados = await res.json();
+      if(!Array.isArray(dados) || dados.length===0){
+        resultado.innerHTML = '<p class="msg">Produto não encontrado.</p>';
         return;
       }
-
-      resultados.innerHTML = '⏳ Buscando...';
-
-      try {
-        const res = await fetch(`fetch("https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=" + encodeURIComponent(termoBusca))
-}`);
-        const data = await res.json();
-
-        if (data.length === 0) {
-          resultados.innerHTML = '<p class="sem-resultado">Nenhum produto encontrado.</p>';
-          return;
-        }
-
-        resultados.innerHTML = data.map(prod => `
-          <div class="resultado">
-            <strong>${prod.nome}</strong><br>
-            <small>SKU: ${prod.sku} | Marca: ${prod.marca} | Cód. Barras: ${prod.codigobarra}</small><br>
-            <strong>Preço Loja: R$ ${Number(prod.preco_nct).toFixed(2)}</strong>
-            <div class="estoque">
-              AQA: ${prod.estoque.nctaqa} | OUT: ${prod.estoque.nctout} | CD ACO: ${prod.estoque.cdaco} | WeWork: ${prod.estoque.wework} | Showroom: ${prod.estoque.showroom}
-            </div>
+      const p = dados[0]; // primeiro resultado
+      resultado.innerHTML = `
+        <div class="card">
+          <div class="foto">FOTO</div>
+          <div class="detalhes">
+            <strong>${p.nome}</strong><br>
+            SKU: ${p.sku}<br>
+            Cód. Barras: ${p.codigobarra}<br>
+            <strong>Preço Loja: R$ ${Number(p.preco_nct).toFixed(2)}</strong>
           </div>
-        `).join('');
-
-      } catch (error) {
-        resultados.innerHTML = '<p class="sem-resultado">Erro ao buscar produtos. Tente novamente.</p>';
-      }
-    });
-  </script>
+        </div>`;
+    }catch(e){
+      console.error(e);
+      resultado.innerHTML = '<p class="msg">Erro ao consultar. Tente novamente.</p>';
+    }
+  }
+</script>
 </body>
 </html>
