@@ -1,91 +1,83 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Consulta de Produtos</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
+      font-family: sans-serif;
+      background-color: #f5f5f5;
       text-align: center;
-      padding: 30px;
+      padding: 2rem;
     }
     h1 {
-      color: #333;
+      font-size: 2rem;
     }
     input[type="text"] {
-      width: 80%;
-      max-width: 600px;
-      padding: 15px;
-      font-size: 18px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 30px;
+      padding: 1rem;
+      font-size: 1.5rem;
+      width: 90%;
+      max-width: 500px;
+      margin: 1rem auto;
+      display: block;
+      border: 2px solid #ccc;
+      border-radius: 10px;
     }
     .resultado {
-      background: #fff;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 10px;
+      background-color: white;
+      padding: 1rem;
+      margin: 1rem auto;
       max-width: 800px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      font-size: 1.2rem;
       text-align: left;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .estoque {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #666;
-    }
-    .sem-resultado {
-      color: #999;
-      font-style: italic;
     }
   </style>
 </head>
 <body>
   <h1>🔍 Consulta de Produtos</h1>
-  <input type="text" id="busca" placeholder="Digite SKU, nome, marca ou código de barras...">
-  <div id="resultados"></div>
+  <input type="text" id="busca" placeholder="Escaneie o código de barras..." autofocus />
+  <div id="resultado" class="resultado"></div>
 
   <script>
-    const input = document.getElementById('busca');
-    const resultados = document.getElementById('resultados');
+    const input = document.getElementById("busca");
+    const resultado = document.getElementById("resultado");
 
-    input.addEventListener('input', async () => {
-      const query = input.value.trim();
-      if (query.length < 3) {
-        resultados.innerHTML = '';
-        return;
-      }
+    let timeout;
 
-      resultados.innerHTML = '⏳ Buscando...';
-
-      try {
-        const res = await fetch(`fetch("https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=" + encodeURIComponent(termoBusca))
-}`);
-        const data = await res.json();
-
-        if (data.length === 0) {
-          resultados.innerHTML = '<p class="sem-resultado">Nenhum produto encontrado.</p>';
-          return;
-        }
-
-        resultados.innerHTML = data.map(prod => `
-          <div class="resultado">
-            <strong>${prod.nome}</strong><br>
-            <small>SKU: ${prod.sku} | Marca: ${prod.marca} | Cód. Barras: ${prod.codigobarra}</small><br>
-            <strong>Preço Loja: R$ ${Number(prod.preco_nct).toFixed(2)}</strong>
-            <div class="estoque">
-              AQA: ${prod.estoque.nctaqa} | OUT: ${prod.estoque.nctout} | CD ACO: ${prod.estoque.cdaco} | WeWork: ${prod.estoque.wework} | Showroom: ${prod.estoque.showroom}
-            </div>
-          </div>
-        `).join('');
-
-      } catch (error) {
-        resultados.innerHTML = '<p class="sem-resultado">Erro ao buscar produtos. Tente novamente.</p>';
+    input.addEventListener("input", () => {
+      clearTimeout(timeout);
+      const valor = input.value.trim();
+      if (valor.length >= 13 && valor.length <= 14 && /^\d+$/.test(valor)) {
+        timeout = setTimeout(() => buscarProduto(valor), 200); // pequena espera
+      } else {
+        resultado.innerHTML = "";
       }
     });
+
+    async function buscarProduto(cod) {
+      try {
+        const res = await fetch(`https://n8n.rjduarte.com.br/webhook/produtos?busca=${cod}`);
+        const data = await res.json();
+
+        if (data.length > 0) {
+          const item = data[0];
+          resultado.innerHTML = `
+            <strong>${item.nome}</strong><br>
+            SKU: ${item.sku} | Marca: ${item.marca} | Cód. Barras: ${item.codigobarra}<br>
+            Preço Loja: R$ ${parseFloat(item.preco_nct).toFixed(2)}<br>
+            AQA: ${item.estoque.nctaqa} | OUT: ${item.estoque.nctout} | CD ACO: ${item.estoque.cdaco} | WeWork: ${item.estoque.wework} | Showroom: ${item.estoque.showroom}
+          `;
+        } else {
+          resultado.innerHTML = "<em>Produto não encontrado.</em>";
+        }
+      } catch (err) {
+        resultado.innerHTML = "<em>Erro na consulta.</em>";
+        console.error(err);
+      }
+    }
   </script>
 </body>
 </html>
