@@ -53,8 +53,8 @@
     const resultados = document.getElementById('resultados');
 
     input.addEventListener('input', async () => {
-      const termoBusca = input.value.trim();
-      if (termoBusca.length < 3) {
+      const query = input.value.trim();
+      if (query.length < 3) {
         resultados.innerHTML = '';
         return;
       }
@@ -62,10 +62,11 @@
       resultados.innerHTML = '⏳ Buscando...';
 
       try {
-        const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=${encodeURIComponent(termoBusca)}`);
+        const res = await fetch(`fetch("https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=" + encodeURIComponent(termoBusca))
+}`);
         const data = await res.json();
 
-        if (!data || data.length === 0) {
+        if (data.length === 0) {
           resultados.innerHTML = '<p class="sem-resultado">Nenhum produto encontrado.</p>';
           return;
         }
@@ -82,7 +83,6 @@
         `).join('');
 
       } catch (error) {
-        console.error(error);
         resultados.innerHTML = '<p class="sem-resultado">Erro ao buscar produtos. Tente novamente.</p>';
       }
     });
