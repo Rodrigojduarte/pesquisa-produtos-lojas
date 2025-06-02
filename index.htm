@@ -5,17 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consulta de Produtos</title>
   <style>
-    *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;}
-    body{margin:0;padding:2rem;background:#f4f4f4;text-align:center;color:#333;}
-    h1{margin-bottom:2rem;font-size:2rem;display:flex;justify-content:center;align-items:center;gap:.5rem;}
-    .search-box{width:85%;max-width:500px;margin:0 auto 2rem;}
-    #busca{width:100%;padding:1rem;font-size:1.25rem;border-radius:8px;border:1px solid #ccc;}
-    #resultado{max-width:600px;margin:0 auto;}
-    .card{background:#fff;padding:1rem;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);text-align:left;display:flex;gap:1rem;align-items:center;}
-    .foto{width:120px;height:120px;background:#ececec;border-radius:8px;flex-shrink:0;display:flex;justify-content:center;align-items:center;color:#aaa;font-size:.75rem;}
-    .detalhes{flex:1;}
-    @media(max-width:600px){h1{font-size:1.5rem;} #busca{font-size:1rem;}}
-    .msg{font-style:italic;color:#888;margin-top:1rem;}
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 2rem;
+      background: #f4f4f4;
+      text-align: center;
+      color: #333;
+    }
+    h1 {
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: .5rem;
+    }
+    .search-box {
+      width: 85%;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+    #busca {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.25rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    #resultado {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      text-align: left;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .foto {
+      width: 120px;
+      height: 120px;
+      background: #ececec;
+      border-radius: 8px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .detalhes {
+      flex: 1;
+    }
+    .msg {
+      font-style: italic;
+      color: #888;
+      margin-top: 1rem;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      #busca {
+        font-size: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -25,44 +91,47 @@
   </div>
   <div id="resultado"></div>
 
-<script>
-  const input = document.getElementById('busca');
-  const resultado = document.getElementById('resultado');
+  <script>
+    const input = document.getElementById('busca');
+    const resultado = document.getElementById('resultado');
 
-  input.addEventListener('input', () => {
-    const valor = input.value.replace(/[^\d]/g, ''); // somente dígitos
-    if (valor.length === 13 || valor.length === 14) {
-      buscarProduto(valor);
-    } else {
-      resultado.innerHTML = '';
-    }
-  });
-
-  async function buscarProduto(gtin){
-    resultado.innerHTML = '<p class="msg">⏳ Buscando...</p>';
-    try{
-      const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=${gtin}`);
-      const dados = await res.json();
-      if(!Array.isArray(dados) || dados.length===0){
-        resultado.innerHTML = '<p class="msg">Produto não encontrado.</p>';
-        return;
+    input.addEventListener('input', () => {
+      const valor = input.value.replace(/[^\d]/g, ''); // somente números
+      if (valor.length === 13 || valor.length === 14) {
+        buscarProduto(valor);
+      } else {
+        resultado.innerHTML = '';
       }
-      const p = dados[0]; // primeiro resultado
-      resultado.innerHTML = `
-        <div class="card">
-          <div class="foto">FOTO</div>
-          <div class="detalhes">
-            <strong>${p.nome}</strong><br>
-            SKU: ${p.sku}<br>
-            Cód. Barras: ${p.codigobarra}<br>
-            <strong>Preço Loja: R$ ${Number(p.preco_nct).toFixed(2)}</strong>
-          </div>
-        </div>`;
-    }catch(e){
-      console.error(e);
-      resultado.innerHTML = '<p class="msg">Erro ao consultar. Tente novamente.</p>';
+    });
+
+    async function buscarProduto(gtin) {
+      resultado.innerHTML = '<p class="msg">⏳ Buscando...</p>';
+      try {
+        const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=${gtin}`);
+        const dados = await res.json();
+        if (!Array.isArray(dados) || dados.length === 0) {
+          resultado.innerHTML = '<p class="msg">Produto não encontrado.</p>';
+          return;
+        }
+        const p = dados[0];
+        resultado.innerHTML = `
+          <div class="card">
+            <div class="foto">
+              <img src="${p.imagens_externas_link}" alt="Imagem do Produto"
+                   onerror="this.src='https://via.placeholder.com/120?text=Sem+Imagem'">
+            </div>
+            <div class="detalhes">
+              <strong>${p.nome}</strong><br>
+              SKU: ${p.sku}<br>
+              Cód. Barras: ${p.codigobarra}<br>
+              <strong>Preço Loja: R$ ${Number(p.preco_nct).toFixed(2)}</strong>
+            </div>
+          </div>`;
+      } catch (e) {
+        console.error(e);
+        resultado.innerHTML = '<p class="msg">Erro ao consultar. Tente novamente.</p>';
+      }
     }
-  }
-</script>
+  </script>
 </body>
 </html>
