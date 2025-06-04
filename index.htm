@@ -1,61 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Consulta de Produtos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
-    }
     body {
       margin: 0;
-      padding: 2rem;
-      background: #f4f4f4;
-      text-align: center;
+      font-family: 'Inter', sans-serif;
+      background: #f9f9f9;
       color: #333;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
     }
     h1 {
-      margin-bottom: 2rem;
-      font-size: 2rem;
+      font-size: 2.5rem;
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: .5rem;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
     }
     .search-box {
-      width: 85%;
-      max-width: 500px;
-      margin: 0 auto 2rem;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 2rem;
     }
     #busca {
       width: 100%;
-      padding: 1rem;
-      font-size: 1.25rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      padding: 1.25rem;
+      font-size: 1.5rem;
+      border-radius: 12px;
+      border: 2px solid #ccc;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     #resultado {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .card {
+      max-width: 1100px;
+      width: 100%;
       background: #fff;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      text-align: left;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      padding: 2rem;
       display: flex;
-      gap: 1rem;
+      flex-direction: row;
+      gap: 2rem;
       align-items: center;
+      transition: all 0.3s ease;
     }
     .foto {
-      width: 120px;
-      height: 120px;
-      background: #ececec;
-      border-radius: 8px;
-      flex-shrink: 0;
+      width: 200px;
+      height: 200px;
+      background: #f0f0f0;
+      border-radius: 12px;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -64,30 +65,40 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      border-radius: 8px;
     }
     .detalhes {
       flex: 1;
+      font-size: 1.5rem;
+    }
+    .detalhes strong {
+      font-size: 1.6rem;
+      color: #111;
     }
     .msg {
+      margin-top: 2rem;
       font-style: italic;
       color: #888;
-      margin-top: 1rem;
     }
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.5rem;
+    @media (max-width: 768px) {
+      #resultado {
+        flex-direction: column;
+        text-align: center;
       }
-      #busca {
-        font-size: 1rem;
+      .detalhes {
+        font-size: 1.2rem;
+      }
+      .foto {
+        width: 150px;
+        height: 150px;
       }
     }
   </style>
 </head>
 <body>
-  <h1>🔍 Consulta de Produtos</h1>
+  <h1>🔍 Consulta de Produtos
+  </h1>
   <div class="search-box">
-    <input type="text" id="busca" placeholder="Escaneie ou digite o código de barras (EAN-13 / EAN-14)" autofocus />
+    <input type="text" id="busca" placeholder="Digite ou escaneie o código de barras (EAN-13 ou 14)" autofocus />
   </div>
   <div id="resultado"></div>
 
@@ -96,12 +107,9 @@
     const resultado = document.getElementById('resultado');
 
     input.addEventListener('input', () => {
-      const valor = input.value.replace(/[^\d]/g, '');
-      if (valor.length === 13 || valor.length === 14) {
-        buscarProduto(valor);
-      } else {
-        resultado.innerHTML = '';
-      }
+      const valor = input.value.replace(/\D/g, '');
+      if (valor.length === 13 || valor.length === 14) buscarProduto(valor);
+      else resultado.innerHTML = '';
     });
 
     async function buscarProduto(gtin) {
@@ -113,24 +121,17 @@
           resultado.innerHTML = '<p class="msg">Produto não encontrado.</p>';
           return;
         }
-
         const p = dados[0];
-        const imagem = p.imagem_link && p.imagem_link.startsWith('http')
-          ? p.imagem_link
-          : 'https://placehold.co/120x120?text=Sem+Imagem';
-
+        const imagem = p.imagem_link && p.imagem_link.startsWith('http') ? p.imagem_link : 'https://via.placeholder.com/200?text=Sem+Imagem';
         resultado.innerHTML = `
-          <div class="card">
-            <div class="foto">
-              <img src="${imagem}" alt="Imagem do Produto"
-                   onerror="this.onerror=null;this.src='https://placehold.co/120x120?text=Sem+Imagem'">
-            </div>
-            <div class="detalhes">
-              <strong>${p.nome}</strong><br>
-              SKU: ${p.sku}<br>
-              Cód. Barras: ${p.codigobarra}<br>
-              <strong>Preço Loja: R$ ${Number(p.preco_nct).toFixed(2)}</strong>
-            </div>
+          <div class="foto">
+            <img src="${imagem}" alt="Imagem do Produto" onerror="this.onerror=null;this.src='https://via.placeholder.com/200?text=Sem+Imagem'">
+          </div>
+          <div class="detalhes">
+            <strong>${p.nome}</strong><br>
+            SKU: ${p.sku}<br>
+            Cód. Barras: ${p.codigobarra}<br>
+            <strong>Preço Loja: R$ ${Number(p.preco_nct).toFixed(2)}</strong>
           </div>`;
       } catch (e) {
         console.error(e);
