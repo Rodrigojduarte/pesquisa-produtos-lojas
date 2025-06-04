@@ -122,7 +122,8 @@
         resultado.innerHTML = `
           <div class="card">
             <div class="foto">
-              <img src="${imagem}" alt="Imagem do Produto">
+              <img src="${imagem}" alt=""
+                   onerror="this.onerror=null;this.src='https://via.placeholder.com/120?text=Sem+Imagem'">
             </div>
             <div class="detalhes">
               <strong>${p.nome}</strong><br>
