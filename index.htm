@@ -113,12 +113,16 @@
           resultado.innerHTML = '<p class="msg">Produto não encontrado.</p>';
           return;
         }
+
         const p = dados[0];
+        const imagem = p.imagem_link && p.imagem_link.startsWith('http')
+          ? p.imagem_link
+          : 'https://via.placeholder.com/120?text=Sem+Imagem';
+
         resultado.innerHTML = `
           <div class="card">
             <div class="foto">
-              <img src="${p.imagem_link || 'https://via.placeholder.com/120?text=Sem+Imagem'}" alt="Imagem do Produto"
-                   onerror="this.src='https://via.placeholder.com/120?text=Sem+Imagem'">
+              <img src="${imagem}" alt="Imagem do Produto">
             </div>
             <div class="detalhes">
               <strong>${p.nome}</strong><br>
