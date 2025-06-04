@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Consulta de Produtos</title>
   <style>
     * {
@@ -115,18 +115,15 @@
         }
 
         const p = dados[0];
-        const imagem = p.imagem_link && typeof p.imagem_link === 'string' && p.imagem_link.trim().startsWith('http')
+        const imagem = p.imagem_link && p.imagem_link.startsWith('http')
           ? p.imagem_link.trim()
           : 'https://via.placeholder.com/120?text=Sem+Imagem';
-
-        console.log('🖼️ URL da imagem:', imagem);
 
         resultado.innerHTML = `
           <div class="card">
             <div class="foto">
-              <img src="${imagem}" alt=""
-                   referrerpolicy="no-referrer"
-                   onerror="this.onerror=null;this.src='https://via.placeholder.com/120?text=Sem+Imagem'">
+              <img src="${imagem}" alt="Imagem do Produto"
+                onerror="this.onerror=null;this.src='https://via.placeholder.com/120?text=Sem+Imagem';">
             </div>
             <div class="detalhes">
               <strong>${p.nome}</strong><br>
