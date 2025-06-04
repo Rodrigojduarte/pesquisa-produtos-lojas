@@ -96,7 +96,7 @@
     const resultado = document.getElementById('resultado');
 
     input.addEventListener('input', () => {
-      const valor = input.value.replace(/[^\d]/g, ''); // somente números
+      const valor = input.value.replace(/[^\d]/g, '');
       if (valor.length === 13 || valor.length === 14) {
         buscarProduto(valor);
       } else {
@@ -117,7 +117,7 @@
         resultado.innerHTML = `
           <div class="card">
             <div class="foto">
-              <img src="${p.imagens_externas_link}" alt="Imagem do Produto"
+              <img src="${p.imagem_link || 'https://via.placeholder.com/120?text=Sem+Imagem'}" alt="Imagem do Produto"
                    onerror="this.src='https://via.placeholder.com/120?text=Sem+Imagem'">
             </div>
             <div class="detalhes">
