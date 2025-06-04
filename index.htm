@@ -3,102 +3,102 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Consulta de Produtos</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Consulta de Preços - NCT!</title>
   <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
     body {
       margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: #f9f9f9;
+      padding: 1rem;
+      background: #f7f7f7;
       color: #333;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
     }
-    h1 {
-      font-size: 2.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
+    .topo {
+      background-color: #ffbc0d;
+      padding: 1rem;
+      text-align: center;
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #222;
+      letter-spacing: 1px;
     }
-    .search-box {
-      width: 100%;
-      max-width: 600px;
-      margin-bottom: 2rem;
+    .busca {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0;
     }
     #busca {
       width: 100%;
-      padding: 1.25rem;
-      font-size: 1.5rem;
-      border-radius: 12px;
-      border: 2px solid #ccc;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      max-width: 600px;
+      font-size: 1.8rem;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 2px solid #ffbc0d;
     }
-    #resultado {
-      max-width: 1100px;
-      width: 100%;
+    .card {
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      padding: 2rem;
-      display: flex;
-      flex-direction: row;
-      gap: 2rem;
-      align-items: center;
-      transition: all 0.3s ease;
-    }
-    .foto {
-      width: 200px;
-      height: 200px;
-      background: #f0f0f0;
       border-radius: 12px;
-      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+    .imagem {
+      flex: 0 0 240px;
+      height: 240px;
       display: flex;
       justify-content: center;
       align-items: center;
+      border-radius: 10px;
+      background: #eee;
     }
-    .foto img {
-      width: 100%;
-      height: 100%;
+    .imagem img {
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
     }
-    .detalhes {
+    .info {
       flex: 1;
-      font-size: 1.5rem;
+      text-align: left;
     }
-    .detalhes strong {
-      font-size: 1.6rem;
-      color: #111;
+    .info h2 {
+      font-size: 2rem;
+      margin: 0 0 1rem;
+      color: #222;
+    }
+    .info p {
+      font-size: 1.5rem;
+      margin: .2rem 0;
+    }
+    .preco {
+      font-size: 2.8rem;
+      color: #d90c0c;
+      font-weight: bold;
+      margin-top: 1.2rem;
     }
     .msg {
-      margin-top: 2rem;
-      font-style: italic;
+      font-size: 1.4rem;
+      text-align: center;
       color: #888;
+      margin-top: 2rem;
     }
     @media (max-width: 768px) {
-      #resultado {
-        flex-direction: column;
-        text-align: center;
-      }
-      .detalhes {
-        font-size: 1.2rem;
-      }
-      .foto {
-        width: 150px;
-        height: 150px;
-      }
+      .info h2 { font-size: 1.8rem; }
+      .preco { font-size: 2.2rem; }
     }
   </style>
 </head>
 <body>
-  <h1>🔍 Consulta de Produtos
-  </h1>
-  <div class="search-box">
-    <input type="text" id="busca" placeholder="Digite ou escaneie o código de barras (EAN-13 ou 14)" autofocus />
+  <div class="topo">Consulta de Preços - NCT!</div>
+  <div class="busca">
+    <input id="busca" type="text" placeholder="Digite ou escaneie o código de barras (EAN)" autofocus />
   </div>
   <div id="resultado"></div>
 
@@ -107,13 +107,16 @@
     const resultado = document.getElementById('resultado');
 
     input.addEventListener('input', () => {
-      const valor = input.value.replace(/\D/g, '');
-      if (valor.length === 13 || valor.length === 14) buscarProduto(valor);
-      else resultado.innerHTML = '';
+      const valor = input.value.replace(/[^\d]/g, '');
+      if (valor.length === 13 || valor.length === 14) {
+        buscarProduto(valor);
+      } else {
+        resultado.innerHTML = '';
+      }
     });
 
     async function buscarProduto(gtin) {
-      resultado.innerHTML = '<p class="msg">⏳ Buscando...</p>';
+      resultado.innerHTML = '<p class="msg">Buscando informações do produto...</p>';
       try {
         const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=${gtin}`);
         const dados = await res.json();
@@ -122,16 +125,20 @@
           return;
         }
         const p = dados[0];
-        const imagem = p.imagem_link && p.imagem_link.startsWith('http') ? p.imagem_link : 'https://via.placeholder.com/200?text=Sem+Imagem';
+        const imagem = p.imagem_link && p.imagem_link.startsWith('http')
+          ? p.imagem_link
+          : 'https://via.placeholder.com/240x240?text=Sem+Imagem';
         resultado.innerHTML = `
-          <div class="foto">
-            <img src="${imagem}" alt="Imagem do Produto" onerror="this.onerror=null;this.src='https://via.placeholder.com/200?text=Sem+Imagem'">
-          </div>
-          <div class="detalhes">
-            <strong>${p.nome}</strong><br>
-            SKU: ${p.sku}<br>
-            Cód. Barras: ${p.codigobarra}<br>
-            <strong>Preço Loja: R$ ${Number(p.preco_nct).toFixed(2)}</strong>
+          <div class="card">
+            <div class="imagem">
+              <img src="${imagem}" alt="Imagem do Produto">
+            </div>
+            <div class="info">
+              <h2>${p.nome}</h2>
+              <p>SKU: ${p.sku}</p>
+              <p>Cód. Barras: ${p.codigobarra}</p>
+              <div class="preco">R$ ${Number(p.preco_nct).toFixed(2)}</div>
+            </div>
           </div>`;
       } catch (e) {
         console.error(e);
