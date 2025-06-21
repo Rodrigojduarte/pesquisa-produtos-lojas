@@ -1,73 +1,78 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Consulta de Preços</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #fff8e1;
+      background-color: #fff7e6;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
     }
 
     .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      margin-top: 40px;
+      width: 90%;
       max-width: 500px;
-      margin: auto;
-      background-color: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
     }
 
     h1 {
+      text-align: center;
       background-color: #ffc107;
-      padding: 20px;
-      border-radius: 10px;
-      font-size: 28px;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
     }
 
-    input {
+    input[type="text"] {
       width: 100%;
-      padding: 15px;
-      font-size: 20px;
-      margin: 20px 0;
+      padding: 12px;
+      font-size: 18px;
       border: 2px solid #ccc;
       border-radius: 10px;
-      text-align: center;
-    }
-
-    .msg {
-      color: #f44336;
-      font-weight: bold;
+      margin-bottom: 20px;
     }
 
     .produto {
-      margin-top: 20px;
-      text-align: left;
+      text-align: center;
     }
 
     .produto img {
       max-width: 100%;
-      height: auto;
       border-radius: 10px;
-      margin-bottom: 15px;
     }
 
-    .produto p {
-      font-size: 20px;
-      margin: 5px 0;
+    .preco-destaque {
+      font-size: 2rem;
+      color: #d32f2f;
+      font-weight: bold;
+      margin: 10px 0;
     }
 
-    @media (max-width: 600px) {
-      input {
-        font-size: 18px;
-      }
+    .detalhes {
+      text-align: left;
+      margin-top: 10px;
+    }
 
-      .produto p {
-        font-size: 18px;
-      }
+    .detalhes div {
+      margin-bottom: 4px;
+    }
+
+    .erro {
+      color: #e91e63;
+      text-align: center;
+      font-style: italic;
     }
   </style>
 </head>
@@ -79,39 +84,39 @@
   </div>
 
   <script>
-    const input = document.getElementById('codigo');
-    const resultado = document.getElementById('resultado');
+    const input = document.getElementById("codigo");
+    const resultado = document.getElementById("resultado");
 
-    input.addEventListener('keypress', async (e) => {
-      if (e.key === 'Enter') {
+    input.addEventListener("keyup", function (e) {
+      if (e.key === "Enter") {
         const codigo = input.value.trim();
-        if (!codigo) return;
-
-        resultado.innerHTML = '<p>🔄 Buscando...</p>';
-
-        try {
-          const response = await fetch(`https://n8n.rjduarte.com.br/webhook/consulta-precos?busca=${codigo}`);
-          const dados = await response.json();
-
-          console.log("🔎 Dados recebidos da API:", dados);
-
-          if (!dados || !dados.nome) {
-            resultado.innerHTML = '<p class="msg">❌ Produto não encontrado.</p>';
-            return;
-          }
-
-          resultado.innerHTML = `
-            <div class="produto">
-              <img src="${dados.imagem}" alt="Imagem do produto">
-              <p><strong>${dados.nome}</strong></p>
-              <p>💰 Preço: <strong>R$ ${dados.preco_nct}</strong></p>
-              <p>🏷️ Marca: ${dados.marca}</p>
-              <p>📦 GTIN: ${dados.codigobarra}</p>
-            </div>
-          `;
-        } catch (error) {
-          console.error("Erro na requisição:", error);
-          resultado.innerHTML = '<p class="msg">❌ Erro ao buscar produto.</p>';
+        if (codigo) {
+          fetch(`https://n8n.rjduarte.com.br/webhook/consulta-precos?busca=${codigo}`)
+            .then(res => res.json())
+            .then(data => {
+              console.log("Dados recebidos da API:", data);
+              if (!data || !data.nome) {
+                resultado.innerHTML = '<div class="erro">❌ Produto não encontrado.</div>';
+              } else {
+                resultado.innerHTML = `
+                  <div class="produto">
+                    <img src="${data.imagem || ''}" alt="Imagem do produto" onerror="this.src='https://via.placeholder.com/300x300?text=Imagem+Indispon%C3%ADvel';" />
+                    <div class="info">
+                      <h3 class="nome">${data.nome}</h3>
+                      <div class="preco-destaque">💰 Preço: R$ ${parseFloat(data.preco_nct).toFixed(2)}</div>
+                      <div class="detalhes">
+                        <div>🏷️ Marca: ${data.marca || 'N/A'}</div>
+                        <div>📦 GTIN: ${data.codigobarra || ''}</div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }
+            })
+            .catch(err => {
+              console.error("Erro na requisição:", err);
+              resultado.innerHTML = '<div class="erro">Erro na consulta. Tente novamente.</div>';
+            });
         }
       }
     });
