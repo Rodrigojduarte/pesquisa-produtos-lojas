@@ -126,11 +126,17 @@
       try {
         const res = await fetch(`https://n8n.rjduarte.com.br/webhook/consulta-precos?busca=${gtin}`);
         const dados = await res.json();
-        if (!Array.isArray(dados) || dados.length === 0) {
-          resultado.innerHTML = '<p class="msg">Produto não encontrado.</p>';
+
+        if (!Array.isArray(dados) || dados.length === 0 || !dados[0].nome) {
+          resultado.innerHTML = '<p class="msg">❌ Produto não encontrado.</p>';
           return;
         }
+
         const p = dados[0];
+        const nome = p.nome || 'Nome não disponível';
+        const preco = p.preco_nct !== null ? `R$ ${parseFloat(p.preco_nct).toFixed(2)}` : 'Preço indisponível';
+        const marca = p.marca || 'Marca não informada';
+        const codigobarra = p.codigobarra || '---';
         const imagem = p.imagem_link && p.imagem_link.startsWith('http') ? p.imagem_link : 'https://via.placeholder.com/250?text=Imagem';
 
         resultado.innerHTML = `
@@ -139,14 +145,14 @@
               <img src="${imagem}" alt="Imagem do Produto">
             </div>
             <div class="detalhes">
-              <div class="produto-nome">${p.nome}</div>
-              <div class="cod">Cód. Barras: ${p.codigobarra}</div>
-              <div class="preco">R$ ${Number(p.preco_nct).toFixed(2)}</div>
+              <div class="produto-nome">${nome}</div>
+              <div class="cod">Marca: ${marca}<br>Cód. Barras: ${codigobarra}</div>
+              <div class="preco">${preco}</div>
             </div>
           </div>`;
       } catch (e) {
         console.error(e);
-        resultado.innerHTML = '<p class="msg">Erro ao consultar. Tente novamente.</p>';
+        resultado.innerHTML = '<p class="msg">⚠️ Erro ao consultar. Tente novamente.</p>';
       }
     }
   </script>
