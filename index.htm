@@ -137,7 +137,7 @@
         const preco = p.preco_nct !== null ? `R$ ${parseFloat(p.preco_nct).toFixed(2)}` : 'Preço indisponível';
         const marca = p.marca || 'Marca não informada';
         const codigobarra = p.codigobarra || '---';
-        const imagem = p.imagem_link && p.imagem_link.startsWith('http') ? p.imagem_link : 'https://via.placeholder.com/250?text=Imagem';
+        const imagem = p.imagem && p.imagem.startsWith('http') ? p.imagem : 'https://via.placeholder.com/250?text=Imagem';
 
         resultado.innerHTML = `
           <div class="card">
