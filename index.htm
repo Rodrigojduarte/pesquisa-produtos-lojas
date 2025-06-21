@@ -124,7 +124,7 @@
     async function buscarProduto(gtin) {
       resultado.innerHTML = '<p class="msg">⏳ Buscando...</p>';
       try {
-        const res = await fetch(`https://n8n.rjduarte.com.br/webhook/d67fd1c9-e927-4df8-88eb-c90e604c2077?busca=${gtin}`);
+        const res = await fetch(`https://n8n.rjduarte.com.br/webhook/consulta-precos?busca=${gtin}`);
         const dados = await res.json();
         if (!Array.isArray(dados) || dados.length === 0) {
           resultado.innerHTML = '<p class="msg">Produto não encontrado.</p>';
