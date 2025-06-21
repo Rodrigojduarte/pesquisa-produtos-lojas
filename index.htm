@@ -126,18 +126,18 @@
       try {
         const res = await fetch(`https://n8n.rjduarte.com.br/webhook/consulta-precos?busca=${gtin}`);
         const dados = await res.json();
+        console.log(dados); // LOG PARA TESTES
 
-        if (!Array.isArray(dados) || dados.length === 0 || !dados[0].nome) {
+        if (!dados || !dados.nome) {
           resultado.innerHTML = '<p class="msg">❌ Produto não encontrado.</p>';
           return;
         }
 
-        const p = dados[0];
-        const nome = p.nome || 'Nome não disponível';
-        const preco = p.preco_nct !== null ? `R$ ${parseFloat(p.preco_nct).toFixed(2)}` : 'Preço indisponível';
-        const marca = p.marca || 'Marca não informada';
-        const codigobarra = p.codigobarra || '---';
-        const imagem = p.imagem && p.imagem.startsWith('http') ? p.imagem : 'https://via.placeholder.com/250?text=Imagem';
+        const nome = dados.nome || 'Nome não disponível';
+        const preco = dados.preco_nct !== null ? `R$ ${parseFloat(dados.preco_nct).toFixed(2)}` : 'Preço indisponível';
+        const marca = dados.marca || 'Marca não informada';
+        const codigobarra = dados.codigobarra || '---';
+        const imagem = dados.imagem && dados.imagem.startsWith('http') ? dados.imagem : 'https://via.placeholder.com/250?text=Imagem';
 
         resultado.innerHTML = `
           <div class="card">
